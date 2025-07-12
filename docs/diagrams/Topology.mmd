@@ -1,0 +1,82 @@
+---
+config:
+  layout: dagre
+---
+flowchart TD
+ subgraph subGraph0["Switch1 - Recepción & Emergencia"]
+        PC1["💻 PC1<br>Recepción"]
+        PC2["💻 PC2<br>Emergencia"]
+        TEL1["📞 Tel1<br>Ext: 101"]
+        TEL2["📞 Tel2<br>Ext: 102"]
+        TEL3["📞 Tel3<br>Ext: 201"]
+        TEL4["📞 Tel4<br>Ext: 202"]
+  end
+ subgraph subGraph1["Switch2 - Consultorios & Administración"]
+        PC3["💻 PC3<br>Consultorio"]
+        PC4["💻 PC4<br>Administración"]
+        TEL5["📞 Tel5<br>Ext: 301"]
+        TEL6["📞 Tel6<br>Ext: 302"]
+        TEL7["📞 Tel7<br>Ext: 401"]
+        TEL8["📞 Tel8<br>Ext: 402"]
+  end
+ subgraph subGraph2["Departamentos del Hospital"]
+        subGraph0
+        subGraph1
+  end
+ subgraph subGraph3["Infraestructura de Red"]
+        ROUTER["🔧 Router Cisco 2911<br>HospitalRouter<br>CME Server"]
+        SW1["⚡ Switch1<br>Cisco 2960"]
+        SW2["⚡ Switch2<br>Cisco 2960"]
+  end
+ subgraph VLANs["VLANs"]
+        VLAN10["VLAN 10<br>DATOS_HOSPITAL<br>192.168.80.0/25"]
+        VLAN20["VLAN 20<br>VOZ_HOSPITAL<br>192.168.80.128/25"]
+  end
+    ROUTER -- "G0/0 - G0/1" --- SW1
+    ROUTER -- "G0/1 - G0/1" --- SW2
+    SW1 -- Fa0/1 --- TEL1
+    TEL1 -- Puerto PC --- PC1
+    SW1 -- Fa0/2 --- TEL2
+    TEL2 -- Puerto PC --- PC2
+    SW1 -- Fa0/3 --- TEL3
+    SW1 -- Fa0/4 --- TEL4
+    SW2 -- Fa0/1 --- TEL5
+    TEL5 -- Puerto PC --- PC3
+    SW2 -- Fa0/2 --- TEL6
+    SW2 -- Fa0/3 --- TEL7
+    TEL7 -- Puerto PC --- PC4
+    SW2 -- Fa0/4 --- TEL8
+    PC1 -.-> VLAN10
+    PC2 -.-> VLAN10
+    PC3 -.-> VLAN10
+    PC4 -.-> VLAN10
+    TEL1 -.-> VLAN20
+    TEL2 -.-> VLAN20
+    TEL3 -.-> VLAN20
+    TEL4 -.-> VLAN20
+    TEL5 -.-> VLAN20
+    TEL6 -.-> VLAN20
+    TEL7 -.-> VLAN20
+    TEL8 -.-> VLAN20
+     PC1:::pcStyle
+     PC2:::pcStyle
+     TEL1:::telStyle
+     TEL2:::telStyle
+     TEL3:::telStyle
+     TEL4:::telStyle
+     PC3:::pcStyle
+     PC4:::pcStyle
+     TEL5:::telStyle
+     TEL6:::telStyle
+     TEL7:::telStyle
+     TEL8:::telStyle
+     ROUTER:::routerStyle
+     SW1:::switchStyle
+     SW2:::switchStyle
+     VLAN10:::vlanStyle
+     VLAN20:::vlanStyle
+    classDef pcStyle fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef telStyle fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef switchStyle fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px
+    classDef routerStyle fill:#fff3e0,stroke:#ef6c00,stroke-width:3px
+    classDef vlanStyle fill:#fce4ec,stroke:#c2185b,stroke-width:2px
