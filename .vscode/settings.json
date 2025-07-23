@@ -1,5 +1,21 @@
 {
     "conventionalCommits.scopes": [
-        "Setup"
+        "Setup",
+        "Final Version"
+    ],
+    "cSpell.words": [
+        "Correctitud",
+        "dagre",
+        "Entregables",
+        "ephone",
+        "ephones",
+        "portfast",
+        "subif",
+        "subinterfaces",
+        "Subinterfaces",
+        "switchport",
+        "TELEFONO",
+        "tracert",
+        "vlan"
     ]
 }

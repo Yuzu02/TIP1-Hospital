@@ -8,7 +8,7 @@ Migrar el sistema de telefonía analógica tradicional a una solución de Telefo
 
 ### Equipos Necesarios
 
-- 1 Router Cisco 2911 (con capacidad CME)
+- 1 Router Cisco 2811 (con capacidad CME)
 - 2 Switches Cisco 2960
 - 8 Teléfonos IP Cisco 7960
 - 4 PCs de escritorio
@@ -59,15 +59,15 @@ Migrar el sistema de telefonía analógica tradicional a una solución de Telefo
 
 #### Conexiones Router-Switches
 
-1. **Router G0/0 → Switch1 G0/1**
+1. **Router F0/0 → Switch1 G0/1**
    - Usar cable "Copper Straight-Through"
-   - Click en Router → seleccionar G0/0
+   - Click en Router → seleccionar F0/0
    - Click en Switch1 → seleccionar G0/1
 
-2. **Router G0/1 → Switch2 G0/1**
+2. **Switch1 G0/2 → Switch2 G0/2**
    - Usar cable "Copper Straight-Through"
-   - Click en Router → seleccionar G0/1
-   - Click en Switch2 → seleccionar G0/1
+   - Click en Switch1 → seleccionar G0/2
+   - Click en Switch2 → seleccionar G0/2
 
 #### Conexiones Teléfonos-Switches
 
@@ -128,7 +128,7 @@ Switch1-Hospital(config-if-range)#spanning-tree portfast
 Switch1-Hospital(config-if-range)#exit
 ```
 
-6. **Configurar puerto troncal (G0/1)**:
+6. **Configurar puerto troncal (G0/1)** - Conexión al Router:
 
 ```bash
 Switch1-Hospital(config)#interface GigabitEthernet0/1
@@ -137,7 +137,16 @@ Switch1-Hospital(config-if)#switchport trunk allowed vlan 10,20
 Switch1-Hospital(config-if)#exit
 ```
 
-7. **Guardar configuración**:
+7. **Configurar puerto troncal (G0/2)** - Conexión a Switch2:
+
+```bash
+Switch1-Hospital(config)#interface GigabitEthernet0/2
+Switch1-Hospital(config-if)#switchport mode trunk
+Switch1-Hospital(config-if)#switchport trunk allowed vlan 10,20
+Switch1-Hospital(config-if)#exit
+```
+
+8. **Guardar configuración**:
 
 ```bash
 Switch1-Hospital(config)#exit
@@ -186,10 +195,10 @@ Switch2-Hospital(config-if-range)#spanning-tree portfast
 Switch2-Hospital(config-if-range)#exit
 ```
 
-6. **Configurar puerto troncal (G0/1)**:
+6. **Configurar puerto troncal (G0/2)** - Conexión a Switch1:
 
 ```bash
-Switch2-Hospital(config)#interface GigabitEthernet0/1
+Switch2-Hospital(config)#interface GigabitEthernet0/2
 Switch2-Hospital(config-if)#switchport mode trunk
 Switch2-Hospital(config-if)#switchport trunk allowed vlan 10,20
 Switch2-Hospital(config-if)#exit
@@ -225,51 +234,31 @@ Router#configure terminal
 Router(config)#hostname HospitalRouter
 ```
 
-### 3.2 Configuración de Subinterfaces (OPTIMIZADA)
+### 3.2 Configuración de Subinterfaces
 
-#### Para la interfaz G0/0 (Switch1)
+#### Para la interfaz F0/0 (Único punto de conexión)
 
 ```bash
-HospitalRouter(config)#interface GigabitEthernet0/0
+HospitalRouter(config)#interface FastEthernet0/0
 HospitalRouter(config-if)#no shutdown
 HospitalRouter(config-if)#exit
 
-HospitalRouter(config)#interface GigabitEthernet0/0.10
-HospitalRouter(config-subif)#description VLAN de Datos Switch1
+HospitalRouter(config)#interface FastEthernet0/0.10
+HospitalRouter(config-subif)#description VLAN de Datos Hospital
 HospitalRouter(config-subif)#encapsulation dot1Q 10
 HospitalRouter(config-subif)#ip address 192.168.80.1 255.255.255.128
 HospitalRouter(config-subif)#exit
 
-HospitalRouter(config)#interface GigabitEthernet0/0.20
-HospitalRouter(config-subif)#description VLAN de Voz Switch1
+HospitalRouter(config)#interface FastEthernet0/0.20
+HospitalRouter(config-subif)#description VLAN de Voz Hospital
 HospitalRouter(config-subif)#encapsulation dot1Q 20
 HospitalRouter(config-subif)#ip address 192.168.80.129 255.255.255.128
 HospitalRouter(config-subif)#exit
 ```
 
-#### Para la interfaz G0/1 (Switch2) - MISMAS IPs, diferentes interfaces físicas
+### 3.3 Configuración del Servidor DHCP
 
-```bash
-HospitalRouter(config)#interface GigabitEthernet0/1
-HospitalRouter(config-if)#no shutdown
-HospitalRouter(config-if)#exit
-
-HospitalRouter(config)#interface GigabitEthernet0/1.10
-HospitalRouter(config-subif)#description VLAN de Datos Switch2
-HospitalRouter(config-subif)#encapsulation dot1Q 10
-HospitalRouter(config-subif)#ip address 192.168.80.1 255.255.255.128
-HospitalRouter(config-subif)#exit
-
-HospitalRouter(config)#interface GigabitEthernet0/1.20
-HospitalRouter(config-subif)#description VLAN de Voz Switch2
-HospitalRouter(config-subif)#encapsulation dot1Q 20
-HospitalRouter(config-subif)#ip address 192.168.80.129 255.255.255.128
-HospitalRouter(config-subif)#exit
-```
-
-### 3.3 Configuración del Servidor DHCP (MEJORADA)
-
-#### Pool de Datos (OPTIMIZADO)
+#### Pool de Datos
 
 ```bash
 HospitalRouter(config)#ip dhcp pool DATOS_HOSPITAL
@@ -280,7 +269,7 @@ HospitalRouter(dhcp-config)#domain-name hospital.local
 HospitalRouter(dhcp-config)#exit
 ```
 
-#### Pool de Voz (OPTIMIZADO)
+#### Pool de Voz
 
 ```bash
 HospitalRouter(config)#ip dhcp pool VOZ_HOSPITAL
@@ -320,45 +309,37 @@ HospitalRouter(config-telephony)#exit
 # Recepción y Admisiones
 HospitalRouter(config)#ephone-dn 1
 HospitalRouter(config-ephone-dn)#number 101
-HospitalRouter(config-ephone-dn)#name Recepcion-101
 HospitalRouter(config-ephone-dn)#exit
 
 HospitalRouter(config)#ephone-dn 2
 HospitalRouter(config-ephone-dn)#number 102
-HospitalRouter(config-ephone-dn)#name Admisiones-102
 HospitalRouter(config-ephone-dn)#exit
 
 # Sala de Emergencias
 HospitalRouter(config)#ephone-dn 3
 HospitalRouter(config-ephone-dn)#number 201
-HospitalRouter(config-ephone-dn)#name Emergencia-201
 HospitalRouter(config-ephone-dn)#exit
 
 HospitalRouter(config)#ephone-dn 4
 HospitalRouter(config-ephone-dn)#number 202
-HospitalRouter(config-ephone-dn)#name Emergencia-202
 HospitalRouter(config-ephone-dn)#exit
 
 # Consultorios Médicos
 HospitalRouter(config)#ephone-dn 5
 HospitalRouter(config-ephone-dn)#number 301
-HospitalRouter(config-ephone-dn)#name Consultorio-301
 HospitalRouter(config-ephone-dn)#exit
 
 HospitalRouter(config)#ephone-dn 6
 HospitalRouter(config-ephone-dn)#number 302
-HospitalRouter(config-ephone-dn)#name Consultorio-302
 HospitalRouter(config-ephone-dn)#exit
 
 # Administración
 HospitalRouter(config)#ephone-dn 7
 HospitalRouter(config-ephone-dn)#number 401
-HospitalRouter(config-ephone-dn)#name Administracion-401
 HospitalRouter(config-ephone-dn)#exit
 
 HospitalRouter(config)#ephone-dn 8
 HospitalRouter(config-ephone-dn)#number 402
-HospitalRouter(config-ephone-dn)#name Administracion-402
 HospitalRouter(config-ephone-dn)#exit
 ```
 

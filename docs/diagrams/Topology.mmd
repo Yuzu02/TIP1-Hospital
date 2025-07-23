@@ -1,6 +1,7 @@
 ---
 config:
   layout: dagre
+title: Hospital Salud Integral - Red VoIP
 ---
 flowchart TD
  subgraph subGraph0["Switch1 - Recepción & Emergencia"]
@@ -23,29 +24,29 @@ flowchart TD
         subGraph0
         subGraph1
   end
- subgraph subGraph3["Infraestructura de Red"]
-        ROUTER["🔧 Router Cisco 2911<br>HospitalRouter<br>CME Server"]
-        SW1["⚡ Switch1<br>Cisco 2960"]
-        SW2["⚡ Switch2<br>Cisco 2960"]
+ subgraph subGraph3["Infraestructura de Red - NUEVA ARQUITECTURA"]
+        ROUTER["🔧 Router Cisco 2811<br>HospitalRouter<br>CME Server<br>Gateway Único"]
+        SW1["⚡ Switch1<br>Cisco 2960<br>Core Switch"]
+        SW2["⚡ Switch2<br>Cisco 2960<br>Access Switch"]
   end
- subgraph VLANs["VLANs"]
+ subgraph VLANs["VLANs - Unificadas"]
         VLAN10["VLAN 10<br>DATOS_HOSPITAL<br>192.168.80.0/25"]
         VLAN20["VLAN 20<br>VOZ_HOSPITAL<br>192.168.80.128/25"]
   end
-    ROUTER -- "G0/0 - G0/1" --- SW1
-    ROUTER -- "G0/1 - G0/1" --- SW2
-    SW1 -- Fa0/1 --- TEL1
-    TEL1 -- Puerto PC --- PC1
-    SW1 -- Fa0/2 --- TEL2
-    TEL2 -- Puerto PC --- PC2
-    SW1 -- Fa0/3 --- TEL3
-    SW1 -- Fa0/4 --- TEL4
-    SW2 -- Fa0/1 --- TEL5
-    TEL5 -- Puerto PC --- PC3
-    SW2 -- Fa0/2 --- TEL6
-    SW2 -- Fa0/3 --- TEL7
-    TEL7 -- Puerto PC --- PC4
-    SW2 -- Fa0/4 --- TEL8
+    ROUTER -- F0/0 → G0/1<br>📡 TRONCAL PRINCIPAL --- SW1
+    SW1 -- "G0/2 → G0/2<br>🔗 ENLACE INTER-SWITCH" --- SW2
+    SW1 -- Fa0/1<br>ACCESO + VOZ --- TEL1
+    TEL1 -- Puerto PC<br>🔌 PASSTHROUGH --- PC1
+    SW1 -- Fa0/2<br>ACCESO + VOZ --- TEL2
+    TEL2 -- Puerto PC<br>🔌 PASSTHROUGH --- PC2
+    SW1 -- Fa0/3<br>ACCESO + VOZ --- TEL3
+    SW1 -- Fa0/4<br>ACCESO + VOZ --- TEL4
+    SW2 -- Fa0/1<br>ACCESO + VOZ --- TEL5
+    TEL5 -- Puerto PC<br>🔌 PASSTHROUGH --- PC3
+    SW2 -- Fa0/2<br>ACCESO + VOZ --- TEL6
+    SW2 -- Fa0/3<br>ACCESO + VOZ --- TEL7
+    TEL7 -- Puerto PC<br>🔌 PASSTHROUGH --- PC4
+    SW2 -- Fa0/4<br>ACCESO + VOZ --- TEL8
     PC1 -.-> VLAN10
     PC2 -.-> VLAN10
     PC3 -.-> VLAN10
@@ -80,3 +81,4 @@ flowchart TD
     classDef switchStyle fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px
     classDef routerStyle fill:#fff3e0,stroke:#ef6c00,stroke-width:3px
     classDef vlanStyle fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+    classDef changeStyle fill:#e8f5e8,stroke:#ff5722,stroke-width:2px,stroke-dasharray: 5 5
